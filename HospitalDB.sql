@@ -59,7 +59,28 @@ CALL PopulateAppointments();
 -- Clean up the procedure
 DROP PROCEDURE PopulateAppointments;
 
--- PHASE 2
+-- Proof of setup
+SELECT COUNT(*) AS total_patients     FROM patients;
+SELECT COUNT(*) AS total_appointments FROM appointments;
+
+
+-- =====================================================
+-- PHASE 2: ADMINISTRATION (THE TWIST)
+-- Limited user that can only see the "name" column
+-- =====================================================
+CREATE USER 'clinic_user'@'localhost' IDENTIFIED BY 'Clinic@123';
+
+-- Column-level GRANT instead of granting the whole table
+GRANT SELECT (name) ON clinic_db.patients TO 'clinic_user'@'localhost';
+
+FLUSH PRIVILEGES;
+
+-- Show what the user is allowed to do
+SHOW GRANTS FOR 'clinic_user'@'localhost';
+
+
+
+-- PHASE 3 
 USE clinic_db;
 
 -- Check record before deletion
@@ -75,7 +96,7 @@ SELECT * FROM appointments WHERE id = 10;
 USE clinic_db;
 SELECT * FROM appointments WHERE id = 10;
 
--- PHASE 3
+-- PHASE 4
 
 EXPLAIN SELECT * FROM appointments WHERE doctor = 'Dr. House';
 
