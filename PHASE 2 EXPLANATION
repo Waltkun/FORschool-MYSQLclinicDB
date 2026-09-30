@@ -1,0 +1,52 @@
+Phase 2 creates a **restricted user account** that can only see patient names and nothing else. It's about database security: giving people the minimum access they need (the "principle of least privilege").
+
+## The idea
+
+Imagine a receptionist who needs to look up patient names but shouldn't see private details like phone numbers or birthdates. Instead of giving them full access, you make an account that can read only the `name` column.
+
+## Line by line
+
+**1. `CREATE USER 'clinic_user'@'localhost' IDENTIFIED BY 'Clinic@123';`**
+Creates a new MySQL account:
+- `clinic_user` is the username
+- `@'localhost'` means it can only log in from the same computer
+- `Clinic@123` is its password
+
+At this point the user exists but can do **nothing**. It has no permissions yet.
+
+**2. `GRANT SELECT (name) ON clinic_db.patients TO 'clinic_user'@'localhost';`**
+This is the **twist**. It gives the user permission to `SELECT` (read) only the `name` column of the `patients` table in `clinic_db`.
+
+A normal grant would look like this, giving access to the *whole* table:
+```sql
+GRANT SELECT ON clinic_db.patients TO 'clinic_user'@'localhost';
+```
+The `(name)` in parentheses is what makes it **column-level**, so `id`, `birthdate`, and `contact` stay hidden.
+
+**3. `FLUSH PRIVILEGES;`**
+Tells MySQL to reload the permission tables so the changes apply right away. (With `GRANT` it's usually automatic, but it's a safe habit.)
+
+**4. `SHOW GRANTS FOR 'clinic_user'@'localhost';`**
+Displays everything this user is allowed to do. You should see something like:
+
+```
+GRANT USAGE ON *.* TO `clinic_user`@`localhost`
+GRANT SELECT (`name`) ON `clinic_db`.`patients` TO `clinic_user`@`localhost`
+```
+
+That second line is your proof that the column-level permission was applied.
+
+## What the user can and can't do
+
+| Query (as clinic_user) | Result |
+|---|---|
+| `SELECT name FROM patients;` | Works |
+| `SELECT contact FROM patients;` | Error 1143: denied for column `contact` |
+| `SELECT * FROM patients;` | Error, because `*` includes columns not granted |
+| `SELECT * FROM appointments;` | Error 1142: no access to that table |
+
+## How to explain it in your presentation
+
+> "We created a limited user account and used column-level GRANT SELECT so it can only read the name column of the patients table. When we log in as that user, selecting name works, but selecting contact or using SELECT * is denied. This protects sensitive patient information by giving the user only the access it needs."
+
+**Remember:** to demonstrate the restrictions, log in as `clinic_user` in a **separate connection** (not your root session), or the tests will all succeed and prove nothing.
