@@ -1,0 +1,12 @@
+-- PHASE 2: ADMINISTRATION (THE TWIST)
+-- Limited user that can only see the "name" column
+-- =====================================================
+CREATE USER 'clinic_user'@'localhost' IDENTIFIED BY 'Clinic@123';
+
+-- Column-level GRANT instead of granting the whole table
+GRANT SELECT (name) ON clinic_db.patients TO 'clinic_user'@'localhost';
+
+FLUSH PRIVILEGES;
+
+-- Show what the user is allowed to do
+SHOW GRANTS FOR 'clinic_user'@'localhost';
