@@ -1,0 +1,14 @@
+Test Data Deletion
+In MySQL CLI, delete a record from appointments:
+
+SQL
+USE clinic_db;
+
+-- Check record before deletion
+SELECT * FROM appointments WHERE id = 10;
+
+-- Delete the record
+DELETE FROM appointments WHERE id = 10;
+
+-- Verify deletion
+SELECT * FROM appointments WHERE id = 10;
