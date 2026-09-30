@@ -1,0 +1,12 @@
+Phase 4 shows that an index makes a search faster, and it uses EXPLAIN to prove it.
+
+The idea
+
+Your appointments table has 100 rows. When you search by doctor, MySQL has to find every row where the doctor is 'Dr. House'.
+
+Without an index, MySQL reads every row one by one and checks each. This is called a full table scan. It's fine for 100 rows, but very slow for millions.
+With an index, MySQL keeps a sorted lookup list of doctor names (like the index at the back of a book). It jumps straight to the 'Dr. House' rows and skips the rest.
+
+How to explain it in your presentation
+
+"We ran EXPLAIN on a query searching by doctor. It showed a full table scan (type ALL, no key), meaning MySQL read every row. We then created an index on the doctor column and ran EXPLAIN again. Now it uses the index (type ref, key idx_doctor) and examines far fewer rows. This shows how indexing improves query performance, especially on large tables."
